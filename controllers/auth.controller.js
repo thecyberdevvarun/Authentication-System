@@ -30,17 +30,82 @@ export async function register(req, res) {
     });
 
     // 3. Create a Token.
-    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
-      expiresIn: "1d",
+    const accessToken = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: "15m",
+    });
+
+    const refreshToken = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.status(201).json({
       message: "User registered successfully.",
       user: { username: user.username, email: user.email },
-      token,
+      accessToken,
     });
   } catch (error) {
     console.log("Something went wrong while creating User.", error);
   }
 }
 
+export async function getMe(req, res) {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Token not found." });
+    }
+
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    const user = await userModel.findById(decoded.id);
+
+    res.status(200).json({
+      message: "User fetched successfully",
+      user: {
+        username: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {}
+}
+
+export async function refreshToken(req, res) {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      res.status(401).json({ message: "Refresh token not found." });
+    }
+
+    const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
+
+    const accessToken = jwt.sign(
+      {
+        id: decoded.id,
+      },
+      config.JWT_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    const newRefreshToken = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res
+      .status(200)
+      .json({ message: "Access Token refresh successfully.", accessToken });
+  } catch (error) {}
+}
