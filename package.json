@@ -1,0 +1,30 @@
+{
+  "name": "authentication-system",
+  "version": "1.0.0",
+  "description": "A production-ready authentication system built using Node.js, Express.js, MongoDB, and JWT while learning real-world backend authentication architecture.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thecyberdevvarun/Authentication-System.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thecyberdevvarun/Authentication-System/issues"
+  },
+  "homepage": "https://github.com/thecyberdevvarun/Authentication-System#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.6.2",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.14"
+  }
+}
